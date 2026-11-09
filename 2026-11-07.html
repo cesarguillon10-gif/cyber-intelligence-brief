@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="robots" content="noindex, nofollow">
+<meta name="robots" content="noindex, nofollow"><meta name="referrer" content="no-referrer">
 <title>Cyber Intelligence Brief</title>
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -37,7 +37,7 @@ function store(){try{return localStorage;}catch(e){return null;}}
 (async function(){
   var s=store(), saved=s&&s.getItem('cib-key');
   // Link access: the key travels in the link after "#k=" (never sent to the server). Anyone with the link gets in.
-  var m=location.hash.match(/[#&]k=([^&]+)/);
+  var m=(location.search+location.hash).match(/[?#&]k=([^&#]+)/);   // ?k= (cache-proof, survives messaging apps) or #k=
   if(m){try{var lk=await derive(decodeURIComponent(m[1])); await open(lk); if(s) s.setItem('cib-key',lk); return;}catch(e){}}
   if(saved){try{await open(saved);return;}catch(e){s.removeItem('cib-key');}}
   document.getElementById('gate').hidden=false;

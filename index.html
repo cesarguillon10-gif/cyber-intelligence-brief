@@ -8,6 +8,7 @@
 <link rel="apple-touch-icon" href="app-icon-v4.png"><link rel="icon" href="app-icon-v4.png">
 <style>
 html,body{margin:0;height:100%;background:#111216;color:#c9ccd3;font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
+.g[hidden]{display:none!important}
 .g{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box}
 .c{width:100%;max-width:340px;text-align:center}
 .c img{width:72px;height:72px;border-radius:16px;margin-bottom:14px}
@@ -36,10 +37,11 @@ async function open(keyHex){var k=await crypto.subtle.importKey('raw',hx(keyHex)
 function store(){try{return localStorage;}catch(e){return null;}}
 (async function(){
   var s=store(), saved=s&&s.getItem('cib-key');
-  // Link access: the key travels in the link after "#k=" (never sent to the server). Anyone with the link gets in.
-  var m=(location.search+location.hash).match(/[?#&]k=([^&#]+)/);   // ?k= (cache-proof, survives messaging apps) or #k=
-  if(m){try{var lk=await derive(decodeURIComponent(m[1])); await open(lk); if(s) s.setItem('cib-key',lk); return;}catch(e){}}
+  // 1) key already remembered on this device: near-instant, no visible lock screen
   if(saved){try{await open(saved);return;}catch(e){s.removeItem('cib-key');}}
+  // 2) link access: the key travels in the link (?k= or #k=). Anyone with the link gets in; remembered afterwards.
+  var m=(location.search+location.hash).match(/[?#&]k=([^&#]+)/);
+  if(m){try{var lk=await derive(decodeURIComponent(m[1])); await open(lk); if(s) s.setItem('cib-key',lk); return;}catch(e){}}
   document.getElementById('gate').hidden=false;
   document.getElementById('f').onsubmit=async function(ev){ev.preventDefault();
     var er=document.getElementById('er'); er.textContent='Unlocking…';

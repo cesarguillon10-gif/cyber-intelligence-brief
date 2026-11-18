@@ -24,6 +24,20 @@ label{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:
 <button type="submit">Open</button>
 <label><input type="checkbox" id="rm" checked> Remember on this device</label><div class="e" id="er"></div></form></div>
 <script>
+// VISIT COUNTER (private dashboard: cyberbrief.goatcounter.com). A single invisible ping, no outside script.
+// Sends: page name (never the ?k= key), where the visitor came from, screen width. No cookies, no personal data.
+// Your own devices: open the site once with #nocount to stop counting yourself (#count to undo).
+(function(){try{
+  var ls=null;try{ls=localStorage;}catch(e){}
+  if(location.hash.indexOf('nocount')>-1&&ls){ls.setItem('cib-nocount','1');}
+  if(location.hash.indexOf('#count')>-1&&ls){ls.removeItem('cib-nocount');}
+  if(location.protocol!=='https:'||(ls&&ls.getItem('cib-nocount'))||navigator.webdriver) return;
+  var page='/'+(location.pathname.split('/').pop()||'');
+  if(page==='/index.html') page='/';
+  var ref=document.referrer||'';
+  new Image().src='https://cyberbrief.goatcounter.com/count?p='+encodeURIComponent(page)+
+    '&r='+encodeURIComponent(ref)+'&s='+encodeURIComponent(screen.width)+'&rnd='+Math.random().toString(36).slice(2);
+}catch(e){}})();
 var D={salt:"879cb7770004ec0fcbac6c3af0bc3764",iter:250000,iv:"3b98b009256657d7a0945a628c49720d",src:"2026-11-04.html.bin?v=eb3fc548b83586e0"};
 // the encrypted page is a separate compact file (gzip-compressed, then AES): fetched once, cached by version
 var CT=fetch(D.src).then(function(r){if(!r.ok)throw new Error("load");return r.arrayBuffer();});

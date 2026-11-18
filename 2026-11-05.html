@@ -18,53 +18,92 @@ input[type=password]:focus{border-color:#5fd6f7}
 button{margin-top:12px;width:100%;height:46px;border:0;border-radius:12px;background:#5fd6f7;color:#0b0d10;font:600 15px inherit;cursor:pointer}
 label{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:14px;font-size:13px;color:#8b909b}
 .e{color:#ff8a8a;font-size:13px;min-height:18px;margin-top:10px}
+.end{max-width:360px;text-align:center}
+.end h1{font:600 20px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;color:#f2f3f5;margin:6px 0 10px}
+.end p{color:#a3a8b3;line-height:1.55;margin:0 0 10px;font-size:14.5px}
+.end .hint{font-size:12.5px;color:#6f7480;margin-top:18px}
 </style></head><body><div class="g" id="gate" hidden><form class="c" id="f">
 <img src="app-icon-v4.png" alt=""><p class="k">Cyber Intelligence Brief</p>
-<input type="password" id="pw" placeholder="Password" autocomplete="current-password" autofocus>
+<input type="password" id="pw" placeholder="Access code" autocomplete="current-password" autofocus>
 <button type="submit">Open</button>
 <label><input type="checkbox" id="rm" checked> Remember on this device</label><div class="e" id="er"></div></form></div>
+<div class="g" id="end" hidden><div class="c end">
+<img src="app-icon-v4.png" alt=""><p class="k">Cyber Intelligence Brief</p>
+<h1>Your preview has ended</h1>
+<p>Thanks for reading the Cyber Intelligence Brief.</p>
+<p>Want to keep access? Comment on the LinkedIn post and I'll send you an extended link.</p>
+<p class="hint">Already have a new link? Just open it.</p></div></div>
 <script>
-// VISIT COUNTER (private dashboard: cyberbrief.goatcounter.com). A single invisible ping, no outside script.
-// Sends: page name (never the ?k= key), where the visitor came from, screen width. No cookies, no personal data.
+// VISIT COUNTER (private dashboard: cyberbrief.goatcounter.com). Invisible pings, no outside script.
+// Sends: page name (never the link key), where the visitor came from, screen width, and which kind of link
+// opened it (public / p01 / owner - codes, never names). No cookies, no personal data.
 // Your own devices: open the site once with #nocount to stop counting yourself (#count to undo).
-(function(){try{
-  var ls=null;try{ls=localStorage;}catch(e){}
-  if(location.hash.indexOf('nocount')>-1&&ls){ls.setItem('cib-nocount','1');}
-  if(location.hash.indexOf('#count')>-1&&ls){ls.removeItem('cib-nocount');}
-  if(location.protocol!=='https:'||(ls&&ls.getItem('cib-nocount'))||navigator.webdriver) return;
-  var page='/'+(location.pathname.split('/').pop()||'');
-  if(page==='/index.html') page='/';
-  var ref=document.referrer||'';
-  new Image().src='https://cyberbrief.goatcounter.com/count?p='+encodeURIComponent(page)+
-    '&r='+encodeURIComponent(ref)+'&s='+encodeURIComponent(screen.width)+'&rnd='+Math.random().toString(36).slice(2);
-}catch(e){}})();
-var D={salt:"879cb7770004ec0fcbac6c3af0bc3764",iter:250000,iv:"53fb46dd2624a5d4a6e99c5605f3b135",src:"2026-11-05.html.bin?v=002586b7f73b906d"};
-// the encrypted page is a separate compact file (gzip-compressed, then AES): fetched once, cached by version
+var GC=(function(){var ls=null;try{ls=localStorage;}catch(e){}
+  try{if(location.hash.indexOf('nocount')>-1&&ls)ls.setItem('cib-nocount','1');
+      if(location.hash.indexOf('#count')>-1&&ls)ls.removeItem('cib-nocount');}catch(e){}
+  var off=location.protocol!=='https:'||navigator.webdriver; try{off=off||!!(ls&&ls.getItem('cib-nocount'));}catch(e){}
+  return function(p,ev){ if(off) return; try{ new Image().src='https://cyberbrief.goatcounter.com/count?p='+encodeURIComponent(p)+
+    (ev?'&e=true':'&r='+encodeURIComponent(document.referrer||'')+'&s='+encodeURIComponent(screen.width))+'&rnd='+Math.random().toString(36).slice(2);}catch(e){} };})();
+(function(){var page='/'+(location.pathname.split('/').pop()||''); GC(page==='/index.html'?'/':page);})();
+
+// ACCESS: every link carries its own access code (?k=). The site's lock changes every day; each valid link has a
+// small file (a/<id>.json) holding that day's key, sealed with the link's code. When a link expires its file is
+// removed (and the file also states the expiry time), so expired links really stop working.
+var D={iv:"119b750566f047ad090d4f3e484cdbb8",src:"2026-11-05.html.bin?v=05e33e4953ed9da4",day:"2026-11-18"};
 var CT=fetch(D.src).then(function(r){if(!r.ok)throw new Error("load");return r.arrayBuffer();});
 function hx(h){var a=new Uint8Array(h.length/2);for(var i=0;i<a.length;i++)a[i]=parseInt(h.substr(i*2,2),16);return a;}
 function b64(s){var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;}
 function toHex(buf){return Array.prototype.map.call(new Uint8Array(buf),function(x){return('0'+x.toString(16)).slice(-2);}).join('');}
-async function derive(pw){var m=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveBits']);
-  return toHex(await crypto.subtle.deriveBits({name:'PBKDF2',salt:hx(D.salt),iterations:D.iter,hash:'SHA-256'},m,256));}
-async function open(keyHex){var k=await crypto.subtle.importKey('raw',hx(keyHex),'AES-CBC',false,['decrypt']);
-  var raw=await crypto.subtle.decrypt({name:'AES-CBC',iv:hx(D.iv)},k,await CT);
+async function sha(t){return toHex(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)));}
+async function fromCode(c){return {id:(await sha('cib-id|'+c)).slice(0,32),kek:await sha('cib-kek|'+c)};}
+function store(){try{localStorage.setItem('cib-t','1');localStorage.removeItem('cib-t');return localStorage;}catch(e){try{return sessionStorage;}catch(e2){return null;}}}
+function E(m){var e=new Error(m);return e;}
+async function unlock(acc){
+  var r; try{r=await fetch('a/'+acc.id+'.json?t='+Date.now(),{cache:'no-store'});}catch(e){throw E('net');}
+  if(r.status===404) throw E('ended'); if(!r.ok) throw E('net');
+  var a=await r.json();
+  if(a.exp&&Date.now()>a.exp) throw E('ended');
+  var w=a.k&&a.k[D.day]; if(!w) throw E('stale');
+  var kk=await crypto.subtle.importKey('raw',hx(acc.kek),'AES-CBC',false,['decrypt']);
+  var ck=await crypto.subtle.decrypt({name:'AES-CBC',iv:hx(w.iv)},kk,b64(w.w));
+  var k=await crypto.subtle.importKey('raw',ck,'AES-CBC',false,['decrypt']);
+  var raw; try{raw=await crypto.subtle.decrypt({name:'AES-CBC',iv:hx(D.iv)},k,await CT);}catch(e){throw E('stale');}
   var pt=await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
-  if(!/^\s*<(!doctype|html)/i.test(pt)) throw new Error('bad');
-  document.open();document.write(pt);document.close();}
-function store(){try{return localStorage;}catch(e){return null;}}
+  if(!/^\s*<(!doctype|html)/i.test(pt)) throw E('stale');
+  return {pt:pt,l:a.l||''};
+}
+function retry(){ // an older cached copy of this page: fetch the current one once
+  if(/[?&]r=1/.test(location.search)) return false;
+  var q=location.search.replace(/^\?/,'').split('&').filter(function(x){return x&&!/^(v|r)=/.test(x);});
+  q.push('v='+Date.now()); q.push('r=1'); location.replace(location.pathname+'?'+q.join('&')+location.hash); return true;}
+function show(pt){document.open();document.write(pt);document.close();}
 (async function(){
-  var s=store(), saved=s&&s.getItem('cib-key');
-  // 1) key already remembered on this device: near-instant, no visible lock screen
-  if(saved){try{await open(saved);return;}catch(e){s.removeItem('cib-key');}}
-  // 2) link access: the key travels in the link (?k= or #k=). Anyone with the link gets in; remembered afterwards.
+  var s=store(), list=[], saved=null;
   var m=(location.search+location.hash).match(/[?#&]k=([^&#]+)/);
-  if(m){try{var lk=await derive(decodeURIComponent(m[1])); await open(lk); if(s) s.setItem('cib-key',lk); return;}catch(e){}}
+  if(m) list.push({acc:await fromCode(decodeURIComponent(m[1])),link:1});
+  try{saved=JSON.parse((s&&s.getItem('cib-acc'))||'null');}catch(e){}
+  if(saved&&saved.id&&saved.kek) list.push({acc:saved});
+  var old=null; try{old=s&&s.getItem('cib-key');}catch(e){}
+  if(old) list.push({acc:{id:'legacy',kek:old},legacy:1});   // devices that unlocked before 18 Nov 2026
+  var ended=false, net=false;
+  for(var i=0;i<list.length;i++){ var c=list[i];
+    try{ var res=await unlock(c.acc);
+      try{ if(s){ s.setItem('cib-acc',JSON.stringify(c.acc)); if(c.legacy) s.removeItem('cib-key'); } }catch(e){}
+      GC('access-'+(res.l||'link'),1); show(res.pt); return;
+    }catch(e){
+      if(e.message==='stale'&&retry()) return;
+      if(e.message==='ended'){ ended=true; try{ if(s&&!c.link){ s.removeItem(c.legacy?'cib-key':'cib-acc'); } }catch(e2){} }
+      if(e.message==='net') net=true;
+    } }
+  if(ended){ GC('preview-ended',1); document.getElementById('end').hidden=false; return; }
   document.getElementById('gate').hidden=false;
+  if(net) document.getElementById('er').textContent='No connection right now. Try again in a moment.';
   document.getElementById('f').onsubmit=async function(ev){ev.preventDefault();
     var er=document.getElementById('er'); er.textContent='Unlocking…';
-    var remember=document.getElementById('rm').checked;   // read before the page is replaced
-    try{var k=await derive(document.getElementById('pw').value); await open(k);
-      if(s){ if(remember) s.setItem('cib-key',k); else s.removeItem('cib-key'); }
-    }catch(e){er.textContent='Wrong password — try again.';}};
+    var remember=document.getElementById('rm').checked;
+    try{ var acc=await fromCode(document.getElementById('pw').value.trim()); var res=await unlock(acc);
+      try{ if(s){ if(remember) s.setItem('cib-acc',JSON.stringify(acc)); else s.removeItem('cib-acc'); } }catch(e){}
+      GC('access-'+(res.l||'code'),1); show(res.pt);
+    }catch(e){ er.textContent=e.message==='ended'?'That code has expired.':(e.message==='net'?'No connection right now.':'Wrong code. Try again.'); }};
 })();
 </script></body></html>

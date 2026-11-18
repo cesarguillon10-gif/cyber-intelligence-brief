@@ -24,7 +24,7 @@ label{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:
 <button type="submit">Open</button>
 <label><input type="checkbox" id="rm" checked> Remember on this device</label><div class="e" id="er"></div></form></div>
 <script>
-var D={salt:"879cb7770004ec0fcbac6c3af0bc3764",iter:250000,iv:"43f752594e25d3901f22ef24a3299b05",src:"2026-11-03.html.bin?v=7dbc4b6814f0c466"};
+var D={salt:"879cb7770004ec0fcbac6c3af0bc3764",iter:250000,iv:"6af69953a6cd1cba5abf60328fd001f8",src:"2026-11-03.html.bin?v=c5ba1d354cb609f9"};
 // the encrypted page is a separate compact file (gzip-compressed, then AES): fetched once, cached by version
 var CT=fetch(D.src).then(function(r){if(!r.ok)throw new Error("load");return r.arrayBuffer();});
 function hx(h){var a=new Uint8Array(h.length/2);for(var i=0;i<a.length;i++)a[i]=parseInt(h.substr(i*2,2),16);return a;}

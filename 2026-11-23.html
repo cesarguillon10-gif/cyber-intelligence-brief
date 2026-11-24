@@ -49,7 +49,7 @@ var GC=(function(){var ls=null;try{ls=localStorage;}catch(e){}
 // ACCESS: every link carries its own access code (?k=). The site's lock changes every day; each valid link has a
 // small file (a/<id>.json) holding that day's key, sealed with the link's code. When a link expires its file is
 // removed (and the file also states the expiry time), so expired links really stop working.
-var D={iv:"3a35f614ecf7a5ef3fcdb8edf235566f",src:"2026-11-23.html.bin?v=95a4ab25aa994638",day:"2026-11-24"};
+var D={iv:"fe412fe3c99c93ffe23d1b0e5c68e818",src:"2026-11-23.html.bin?v=cbdc2d07b36014c0",day:"2026-11-24"};
 var CT=fetch(D.src).then(function(r){if(!r.ok)throw new Error("load");return r.arrayBuffer();});
 function hx(h){var a=new Uint8Array(h.length/2);for(var i=0;i<a.length;i++)a[i]=parseInt(h.substr(i*2,2),16);return a;}
 function b64(s){var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;}
